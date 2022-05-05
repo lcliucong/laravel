@@ -252,6 +252,11 @@
             top: 0;
             z-index: 999;
         }
+        /* 摄像机 */
+        .cam img{
+
+        }
+
         /* 响应式 */
         @media screen and (max-width:1000px ) {
             #login_img{
@@ -292,11 +297,12 @@
 <script type="text/javascript" src="{{URL::asset('jquery/jquery.min.js')}}"></script>
 <script type="test/javascript" src="{{URL::asset('jquery/jquery-1.11.3.min.js')}}"></script>
 <script src="https://unpkg.com/flyio/dist/fly.min.js"></script>
-<body>
+<body class="bod">
     <div id="bg">
         <div id="hint"><!-- 提示框 -->
             <p>登录失败</p>
         </div>
+
         <div id="login_wrap">
             <div id="login"><!-- 登录注册切换动画 -->
                 <div id="status">
@@ -305,11 +311,28 @@
                     <i style="right: 5px">in</i>
                 </div>
                 <span>
-                    <form action="post">
-                        <p class="form"><input type="text" id="user" placeholder="username&phone"></p>
-                        <p class="form"><input type="password" id="passwd" placeholder="password"></p>
-                        <p class="form confirm"><input type="password" id="confirm-passwd" placeholder="confirm password"></p>
-                        <p class="form"><input type="text" id="email" placeholder="email@"></p>
+                    <form action="{{route("admin.logined")}}" method="post">
+                        <p class="form">
+                            <input type="text" name='username' id="user" placeholder="username&phone" value="{{old('username')}}">
+                        </p>
+{{--                        @foreach($errors->get('username') as $msg)--}}
+                        @error('username')
+                        <p>
+{{--                            {{$msg}}--}}
+                            {{$errors->first('username')}}
+                        </p>
+                        @enderror
+{{--                        @endforeach--}}
+                        <p class="form">
+                            <input type="password" id="passwd" placeholder="password">
+                        </p>
+                        <p class="form confirm">
+                            <input type="password" id="confirm-pas  swd" placeholder="confirm password">
+                        </p>
+                        <p class="form">
+                            <input type="text" id="email" placeholder="email@">
+                        </p>
+                        <input type="submit" value="提交">
                         <input type="button" value="登录" class="btn" onclick="login()" style="margin-right: 20px;font-family:@幼圆,serif;">
                         <input type="button" value="注册" class="btn" onclick='signin()' id="btn">
                     </form>
@@ -335,11 +358,26 @@
                     <span></span>
                     <span></span>
                 </span>
+
                 <p id="title">LIUCONG</p>
             </div>
         </div>
+{{--        <div class="fat" style="z-index: 1;position: relative;top: 500px;left: 100px; height: 220px;width: 480px;border: 1px solid black">--}}
+{{--            <div class="cam" style="z-index: 1;position: relative;top:520px;left: 480px;height: 180px;width: 440px;">--}}
+{{--                <img src="{{URL::asset('static/picture/camera.png')}}" alt="shoot" style="height: 180px; width:450px;">--}}
+{{--            </div>--}}
+{{--        </div>--}}
     </div>
 </body>
+<script>
+    let cam = document.getElementsByClassName('cam')[0];
+    cam.onmousemove=function (){
+            cam.style.transform = `translate(${-30 + event.clientX / 20}px, ${-30 + event.clientY / 20}px)`
+     }
+    cam.onmouseout = function(){
+            cam.style.transform = `translate(${0}px, ${0}px)`
+    }
+</script>
 <script>
     var onoff = true//根据此布尔值判断当前为注册状态还是登录状态
     var confirm = document.getElementsByClassName("confirm")[0]
@@ -399,17 +437,24 @@
             status[1].style.top = 0
             onoff = !onoff
         } else {
+            // let arr = [];
+            // arr[0]=users.value
+            // arr[1]=pwd.value
+            // arr[2]=repwd.value
+            // arr[3]=email.value
             $.ajax({
                 type:'post',
                 url:"{{route('admin.sign')}}",
                 data:{
-                    username:users.value,
-                    password:pwd.value,
-                    repassword:repwd.value,
-                    email:email.value
+                    // arr:arr
+                        username:users.value,
+                        password:pwd.value,
+                        repassword:repwd.value,
+                        email:email.value
                 },
                 success:res=>{
-                    alert(res)
+                    alert(res.message);
+                    window.location='{{route("admin.logined")}}'
                 }
             })
             /*if (!/^[A-Za-z0-9]+$/.test(user.value))
@@ -434,7 +479,8 @@
             hint()*/
         }
     }
-
+    window._bd_share_config = {common : {bdText : '{dede:field.title/}',bdDesc : '...',bdUrl : '',bdPic : ''},share : [{"bdSize" : 16}]}
+    with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
     //登录按钮
     function login(data) {
         let users = document.getElementById('user');
@@ -448,13 +494,16 @@
                     username:users.value,
                     password:pwd.value
                 },
-                success:function(res){
-                    if(res.code>200){
-                        alert(res.message);
-                    }else{
-                        alert('登录成功')
-                        window.location="{{route('test.info')}}"
-                    }
+                success:res=>{
+                    // if(res.code>200){
+                    //     alert(res.message);
+                    // }else{
+                    //     alert('登录成功')
+                    {{--    window.location="{{route('test.info')}}"--}}
+                    // }
+                },
+                error:res1=>{
+                    // alert(res1.message)
                 }
             })
             /*let request = new XMLHttpRequest()

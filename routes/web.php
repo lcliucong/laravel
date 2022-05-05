@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-//use app\Http\Controllers\Test\Test;
+use Illuminate\Support\Facades\Cookie;
+//use app\Http\Controllers\Test\Admin;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,19 +41,62 @@ Route::group(['namespace'=>'Test'],function (){
 //    ### Admin控制器
     //渲染登录页面
     Route::group(['prefix'=>'admin','middleware'=>'admin.logined'],function(){
-        Route::get('login',"Admin@login")->withoutMiddleware('admin.logined');
+        Route::get('login/{id?}',"Admin@loginview")->withoutMiddleware('admin.logined');
     //登录接收接口
         Route::post('login',"Admin@login")->name('admin.logined')->withoutMiddleware(\App\Http\Middleware\TestLoginMid::class);
     //注册接收接口
         Route::post('sign',"Admin@login")->name('admin.sign')->withoutMiddleware('admin.logined');
+        //文件上传
+        Route::post('getfile',"Admin@files")->name('admin.files')->withoutMiddleware(\App\Http\Middleware\TestLoginMid::class);
+        //测试路由模型绑定
+        Route::get('test/{test}',"Admin@sel")->withoutMiddleware('admin.logined');
     });
 
 });
-// 404页面丢失或不存在
+//TestController路由
+Route::get('pl/{test}',"Test\TestController@show");
+// 兜底路由 404页面丢失或不存在
 Route::fallback(function(){
     return view('larsql/404');
 });
-Route::middleware('through');
+//测试Response响应的路由
+Route::group(['prefix'=>'response'],function (){
+   Route::get('res',function(){
+       $type = 'test header';
+       return response('this is res',200)->withHeaders(
+           [
+               'content-types'=>$type,
+               'header1' =>'header1s',
+               'header2' =>'header2s',
+               'public' => 'this is public header'
+           ]
+       );
+   });
+});
+//Request请求
+Route::group(['prefix'=>'request'],function(){
+    Route::get('test','Test\Admin@test')->name('r.routed');
+});
+
+//Response返回cookie值
+Route::group(['prefix'=>'resCookie'],function(){
+   Route::get('cok',function (){
+//       Cookie::queue('cookieWithname','cookie value',1);
+       $cok = cookie('cookiename','value',0.5);
+//       return response('this is cookie quene',200);
+//       Cookie::queue($cok);
+//       Cookie::queue(Cookie::forget('cookiename'));
+       return response('this is cookie response',200);//->cookie($cok)->withoutCookie('cookiename');
+
+   });
+   //Response()重定向
+//   Route::get('red',function(){
+//      return redirect()->action([\App\Http\Controllers\Test\Admin::class,'routeIs']);
+//   });
+});
+
+
+
 Route::get('insert/{id?}','Test\Admin@dp');
 //测试Repository
 Route::get('gets','Test\test@gets');

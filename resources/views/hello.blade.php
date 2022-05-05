@@ -10,9 +10,12 @@
 <body>
 <script src="https://unpkg.com/flyio/dist/fly.min.js"></script>
 {{--<form action="{{route('message.msg')}}" method="post">--}}
+<input type="file" id="files" name="file">
+<input type="button" value="提交" onclick="fibtn()">
     <input type="text" id="sels" name="selcontent">@csrf
     <input type="button" id="sele" value="搜索">
     <table width="1000px" border="1px" cellspacing="" cellpadding="" style="margin: 0 auto">
+        <a href="{{route('r.routed')}}">下载</a>
         <tr>
             <th>ID</th>
             <th>姓名</th>
@@ -49,6 +52,28 @@
 {{--</form>--}}
 </body>
 <script>
+    function fibtn(){
+        let file = document.getElementById('files').files[0];
+        // 检查是否支持FormData
+        if(window.FormData) {
+            var formData = new FormData();
+
+            // 建立一个upload表单项，值为上传的文件
+            formData.append('upload', file);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST','{{route("admin.files")}}');
+            // 定义上传完成后的回调函数
+            xhr.onload = function () {
+                if (xhr.status === 200 && xhr.readyState ===4) {
+                    console.log('上传成功');
+                } else {
+                    console.log('出错了');
+                }
+            };
+            console.log(formData);
+            xhr.send(formData);
+        }
+    }
     // window.onload=function (){
     var fly = new Fly;
     var ins = document.getElementById('insert');
